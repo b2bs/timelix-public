@@ -1,0 +1,36 @@
+# Dependències
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Variables d'entorn
+.env
+.env.local
+.env.development
+.env.production
+
+# Compilació (frontend)
+frontend/build/
+frontend/dist/
+
+# Compilació (backend)
+backend/dist/
+
+# Sensibles
+*.key
+*.pem
+backend/config/
+backend/db.js
+
+# Temporals
+*.log
+*.tmp
+*.zip
+*.tar.gz
+
+# PDFs generats
+*.pdf
+
+# Fitxers específics de sistema
+.DS_Store
+Thumbs.db

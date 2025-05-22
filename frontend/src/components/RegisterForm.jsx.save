@@ -1,0 +1,184 @@
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up">
+              <label htmlFor="nom" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <FaUser className="mr-2 text-blue-600 transform hover:scale-110 transition-transform duration-300" /> Nom
+              </label>
+              <input
+                type="text"
+                name="nom"
+                value={userData.nom}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                placeholder="Nom"
+                className={w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 ${errors.nom ? 'border-red-500' : 'border-gray-200'}}
+                required
+              />
+              {errors.nom && <p className="text-red-500 text-sm mt-1 animate-fade-in">{errors.nom}</p>}
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up delay-200">
+              <label htmlFor="cognoms" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <FaUser className="mr-2 text-blue-600 transform hover:scale-110 transition-transform duration-300" /> Cognoms
+              </label>
+              <input
+                type="text"
+                name="cognoms"
+                value={userData.cognoms}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                placeholder="Cognoms"
+                className={w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 ${errors.cognoms ? 'border-red-500' : 'border-gray-200'}}
+                required
+              />
+              {errors.cognoms && <p className="text-red-500 text-sm mt-1 animate-fade-in">{errors.cognoms}</p>}
+            </div>
+
+            <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up delay-400">
+              <label htmlFor="correu" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <FaEnvelope className="mr-2 text-blue-600 transform hover:scale-110 transition-transform duration-300" /> Correu Electrònic
+              </label>
+              <input
+                type="email"
+                name="correu"
+                value={userData.correu}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                placeholder="Correu electrònic"
+                className={w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 ${errors.correu ? 'border-red-500' : 'border-gray-200'}}
+                required
+              />
+              {errors.correu && <p className="text-red-500 text-sm mt-1 animate-fade-in">{errors.correu}</p>}
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up delay-600">
+              <label htmlFor="contrasenya" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <FaLock className="mr-2 text-blue-600 transform hover:scale-110 transition-transform duration-300" /> Contrasenya
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="contrasenya"
+                  value={userData.contrasenya}
+                  onChange={handleChange}
+                  onFocus={handleFocus}
+                  placeholder="Contrasenya"
+                  className={w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 pr-10 ${errors.contrasenya ? 'border-red-500' : 'border-gray-200'}}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => togglePasswordVisibility('password')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-blue-600 transform hover:scale-110 transition-transform duration-300"
+                >
+                  {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
+                </button>
+              </div>
+              {errors.contrasenya && <p className="text-red-500 text-sm mt-1 animate-fade-in">{errors.contrasenya}</p>}
+              <div className="mt-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: ${passwordStrength}%,
+                      backgroundColor:
+                        passwordStrength < 40 ? '#ef4444' : passwordStrength < 70 ? '#f59e0b' : '#10b981',
+                    }}
+                  ></div>
+                </div>
+                <p className="text-xs mt-1 text-gray-600">
+                  Força: {passwordStrength < 40 ? 'Dèbil' : passwordStrength < 70 ? 'Mitjana' : 'Forta'}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up delay-800">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <FaLock className="mr-2 text-blue-600 transform hover:scale-110 transition-transform duration-300" /> Confirmar Contrasenya
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={userData.confirmPassword}
+                  onChange={handleChange}
+                  onFocus={handleFocus}
+                  placeholder="Confirmar contrasenya"
+                  className={w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 pr-10 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-200'}}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => togglePasswordVisibility('confirm')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-blue-600 transform hover:scale-110 transition-transform duration-300"
+                >
+                  {showConfirmPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
+                </button>
+              </div>
+              {errors.confirmPassword && <p className="text-red-500 text-sm mt-1 animate-fade-in">{errors.confirmPassword}</p>}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center animate-pulse-slow"
+            >
+              <FaUserPlus className="mr-2" /> Registrar-me
+            </button>
+          </form>
+        )}
+        <div className="text-center mt-6">
+          <p className="text-gray-600">
+            Ja tens un compte?{' '}
+            <Link to="/login" className="text-blue-600 hover:underline hover:text-blue-700 transition-colors duration-300">
+              Inicia Sessió
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Animacions CSS personalitzades
+const styles = 
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes scaleUp {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes pulseSlow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-fade-in { animation: fadeIn 1s ease-out; }
+  .animate-slide-up { animation: slideUp 1s ease-out; }
+  .animate-slide-down { animation: slideDown 1s ease-out; }
+  .animate-scale-up { animation: scaleUp 1s ease-out; }
+  .animate-slide-in { animation: slideIn 0.5s ease-out; }
+  .animate-pulse-slow { animation: pulseSlow 2s infinite; }
+  .animate-bounce { animation: bounce 1s infinite; }
+;
+
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
+
+export default RegisterForm;

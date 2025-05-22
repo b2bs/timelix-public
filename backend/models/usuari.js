@@ -1,0 +1,66 @@
+// models/usuari.js
+const db = require('../config/db');
+
+const getAllUsers = (callback) => {
+    db.query('SELECT id, nom, cognoms, correu, rol_id FROM usuaris', callback);
+};
+
+const createUser = (nom, cognoms, correu, contrasenya, rol_id, callback) => {
+    const query = 'INSERT INTO usuaris (nom, cognoms, correu, contrasenya, rol_id) VALUES (?, ?, ?, ?, ?)';
+    db.query(query, [nom, cognoms, correu, contrasenya, rol_id], callback);
+};
+
+// Nova funció per actualitzar només nom, cognoms i correu (per a updateProfile)
+const updateUserProfile = (id, nom, cognoms, correu, callback) => {
+    const query = 'UPDATE usuaris SET nom = ?, cognoms = ?, correu = ? WHERE id = ?';
+    db.query(query, [nom, cognoms, correu, id], (err, result) => {
+        if (err) {
+            console.error('Error a la consulta SQL d\'updateUserProfile:', {
+                error: err.message,
+                sqlError: err.sqlMessage,
+                sqlState: err.sqlState,
+                code: err.code
+            });
+            return callback(err);
+        }
+        callback(null, result);
+    });
+};
+
+const updateUser = (id, nom, cognoms, correu, rol_id, callback) => {
+    const query = 'UPDATE usuaris SET nom = ?, cognoms = ?, correu = ?, rol_id = ? WHERE id = ?';
+    db.query(query, [nom, cognoms, correu, rol_id, id], (err, result) => {
+        if (err) {
+            console.error('Error a la consulta SQL d\'updateUser:', err);
+            return callback(err);
+        }
+        callback(null, result);
+    });
+};
+
+const deleteUser = (id, callback) => {
+    const query = 'DELETE FROM usuaris WHERE id = ?';
+    db.query(query, [id], callback);
+};
+
+const getUserById = (id, callback) => {
+    db.query('SELECT id, nom, cognoms, correu, contrasenya, rol_id FROM usuaris WHERE id = ?', [id], (err, results) => {
+        if (err) {
+            console.error('Error a la consulta SQL de getUserById:', err);
+            return callback(err);
+        }
+        callback(null, results[0]);
+    });
+};
+
+const checkEmailExists = (correu, excludeUserId, callback) => {
+    db.query('SELECT id FROM usuaris WHERE correu = ? AND id != ?', [correu, excludeUserId], (err, results) => {
+        if (err) {
+            console.error('Error a la consulta SQL de checkEmailExists:', err);
+            return callback(err);
+        }
+        callback(null, results.length > 0);
+    });
+};
+
+module.exports = { getAllUsers, createUser, updateUser, updateUserProfile, deleteUser, getUserById, checkEmailExists };
