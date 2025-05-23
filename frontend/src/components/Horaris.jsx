@@ -1,41 +1,45 @@
+// Component React per gestionar horaris i tasques amb un calendari interactiu
 import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
-import api from '../services/api';
-import { FaCalendarAlt, FaClock, FaFilter, FaPlus, FaTasks, FaUser } from 'react-icons/fa';
+import dayGridPlugin from '@fullcalendar/daygrid'; // Vista de mes
+import timeGridPlugin from '@fullcalendar/timegrid'; // Vista de setmana/dia
+import listPlugin from '@fullcalendar/list'; // Vista de llista
+import interactionPlugin from '@fullcalendar/interaction'; // Interaccions amb el calendari
+import api from '../services/api'; // Crides a l'API
+import { FaCalendarAlt, FaClock, FaFilter, FaPlus, FaTasks, FaUser } from 'react-icons/fa'; // Icones
 
+// Component Horaris, rep usuari com a prop
 const Horaris = ({ user }) => {
-  const [horaris, setHoraris] = useState([]);
-  const [tasques, setTasques] = useState([]);
-  const [defaultHorari, setDefaultHorari] = useState(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [users, setUsers] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(user.id);
-  const [showActionModal, setShowActionModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showEditTascaModal, setShowEditTascaModal] = useState(false);
-  const [actionType, setActionType] = useState('tasca');
-  const [newAction, setNewAction] = useState({
+  // Estats per gestionar dades
+  const [horaris, setHoraris] = useState([]); // Llista d'horaris
+  const [tasques, setTasques] = useState([]); // Llista de tasques
+  const [defaultHorari, setDefaultHorari] = useState(null); // Horari per defecte
+  const [error, setError] = useState(''); // Missatges d'error
+  const [success, setSuccess] = useState(''); // Missatges d'èxit
+  const [users, setUsers] = useState([]); // Llista d'usuaris
+  const [selectedUserId, setSelectedUserId] = useState(user.id); // ID de l'usuari seleccionat
+  const [showActionModal, setShowActionModal] = useState(false); // Modal per crear accions
+  const [showEditModal, setShowEditModal] = useState(false); // Modal per editar horari
+  const [showEditTascaModal, setShowEditTascaModal] = useState(false); // Modal per editar tasca
+  const [actionType, setActionType] = useState('tasca'); // Tipus d'acció (tasca/horari)
+  const [newAction, setNewAction] = useState({ // Nova acció a crear
     data: '',
     hora_inici: '',
     hora_fi: '',
     descripcio: '',
     usuari_id: user.id,
   });
-  const [editHorari, setEditHorari] = useState(null);
-  const [editTasca, setEditTasca] = useState(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [filterStartDate, setFilterStartDate] = useState('');
-  const [filterEndDate, setFilterEndDate] = useState('');
-  const [filterStatus, setFilterStatus] = useState('totes');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [editHorari, setEditHorari] = useState(null); // Horari a editar
+  const [editTasca, setEditTasca] = useState(null); // Tasca a editar
+  const [currentDate, setCurrentDate] = useState(new Date()); // Data actual
+  const [filterStartDate, setFilterStartDate] = useState(''); // Filtre data inici
+  const [filterEndDate, setFilterEndDate] = useState(''); // Filtre data fi
+  const [filterStatus, setFilterStatus] = useState('totes'); // Filtre estat tasques
+  const [searchTerm, setSearchTerm] = useState(''); // Terme de cerca
 
+  // Carrega inicial i quan canvien filtres o usuari seleccionat
   useEffect(() => {
-    if (user.rol_id === 1) {
+    if (user.rol_id === 1) { // Només admins poden carregar usuaris
       const fetchUsers = async () => {
         try {
           const response = await api.get('/usuaris/', { withCredentials: true });
@@ -46,11 +50,12 @@ const Horaris = ({ user }) => {
       };
       fetchUsers();
     }
-    fetchDefaultHorari();
-    fetchHoraris();
-    fetchTasques();
+    fetchDefaultHorari(); // Carrega horari per defecte
+    fetchHoraris(); // Carrega horaris
+    fetchTasques(); // Carrega tasques
   }, [user, selectedUserId, filterStartDate, filterEndDate, filterStatus, searchTerm]);
 
+  // Obté l'horari per defecte de l'usuari seleccionat
   const fetchDefaultHorari = async () => {
     try {
       const response = await api.get(`/horaris/default/${selectedUserId}`, { withCredentials: true });
@@ -60,6 +65,7 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Obté els horaris de l'usuari amb filtres
   const fetchHoraris = async () => {
     try {
       const startDate = filterStartDate || new Date(currentDate.getFullYear(), 0, 1).toISOString().split('T')[0];
@@ -69,7 +75,7 @@ const Horaris = ({ user }) => {
         withCredentials: true,
       });
       const events = response.data
-        .filter((horari) => {
+        .filter((horari) => { // Filtra per terme de cerca
           if (searchTerm) {
             return (
               horari.hora_inici.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,7 +84,7 @@ const Horaris = ({ user }) => {
           }
           return true;
         })
-        .map((horari) => {
+        .map((horari) => { // Transforma horaris en esdeveniments per FullCalendar
           const date = new Date(horari.data);
           const offset = date.getTimezoneOffset();
           const adjustedDate = new Date(date.getTime() - offset * 60 * 1000);
@@ -101,6 +107,7 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Obté les tasques de l'usuari amb filtres
   const fetchTasques = async () => {
     try {
       const startDate = filterStartDate || new Date(currentDate.getFullYear(), 0, 1).toISOString().split('T')[0];
@@ -110,7 +117,7 @@ const Horaris = ({ user }) => {
         withCredentials: true,
       });
       const events = response.data
-        .filter((tasca) => {
+        .filter((tasca) => { // Filtra per estat i terme de cerca
           let matchesStatus = true;
           if (filterStatus === 'completades') {
             matchesStatus = tasca.completada;
@@ -122,7 +129,7 @@ const Horaris = ({ user }) => {
             : true;
           return matchesStatus && matchesSearch;
         })
-        .map((tasca) => {
+        .map((tasca) => { // Transforma tasques en esdeveniments per FullCalendar
           const date = new Date(tasca.data);
           const offset = date.getTimezoneOffset();
           const adjustedDate = new Date(date.getTime() - offset * 60 * 1000);
@@ -147,11 +154,12 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Combina horaris i tasques per mostrar al calendari
   const allEvents = [...horaris, ...tasques];
 
+  // Gestiona el clic en una data del calendari (només admins)
   const handleDateClick = (info) => {
     if (user.rol_id !== 1) return;
-
     setNewAction({
       data: info.dateStr,
       hora_inici: '',
@@ -163,9 +171,10 @@ const Horaris = ({ user }) => {
     setShowActionModal(true);
   };
 
+  // Gestiona el clic en un esdeveniment del calendari
   const handleEventClick = (info) => {
     const event = info.event;
-    if (event.extendedProps.type === 'horari') {
+    if (event.extendedProps.type === 'horari') { // Edita horari (només admins)
       if (user.rol_id !== 1) return;
       setEditHorari({
         id: event.id,
@@ -174,7 +183,7 @@ const Horaris = ({ user }) => {
         hora_fi: event.extendedProps.hora_fi,
       });
       setShowEditModal(true);
-    } else if (event.extendedProps.type === 'tasca') {
+    } else if (event.extendedProps.type === 'tasca') { // Edita tasca
       setEditTasca({
         id: event.extendedProps.id,
         data: event.startStr.split('T')[0],
@@ -187,6 +196,7 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Marca una tasca com completada o pendent
   const handleCompletarTasca = async (tascaId, completada) => {
     try {
       await api.put(`/tasques/${tascaId}/completar`, { completada }, { withCredentials: true });
@@ -197,16 +207,17 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Crea un nou horari o tasca
   const handleCreateAction = async (e) => {
     e.preventDefault();
     if (actionType === 'horari') {
       const horaInici = new Date(`1970-01-01T${newAction.hora_inici}:00`);
       const horaFi = new Date(`1970-01-01T${newAction.hora_fi}:00`);
-      if (horaInici >= horaFi) {
+      if (horaInici >= horaFi) { // Valida hora inici < hora fi
         setError("L'hora d'inici ha de ser anterior a l'hora de fi.");
         return;
       }
-      const overlappingHorari = horaris.find(
+      const overlappingHorari = horaris.find( // Comprova solapaments
         (horari) =>
           horari.extendedProps.data === newAction.data &&
           horari.extendedProps.usuari_id === parseInt(newAction.usuari_id) &&
@@ -223,7 +234,7 @@ const Horaris = ({ user }) => {
         setError('Aquest horari se solapa amb un altre existent.');
         return;
       }
-      try {
+      try { // Crea horari
         await api.post(
           '/horaris/',
           {
@@ -241,12 +252,12 @@ const Horaris = ({ user }) => {
       } catch (err) {
         setError(err.response?.data?.message || 'Error creant horari');
       }
-    } else {
+    } else { // Crea tasca
       if (!newAction.descripcio.trim()) {
         setError('La descripció de la tasca no pot estar buida.');
         return;
       }
-      if (newAction.hora_inici && newAction.hora_fi) {
+      if (newAction.hora_inici && newAction.hora_fi) { // Valida hores dins horari per defecte
         const horaInici = new Date(`1970-01-01T${newAction.hora_inici}:00`);
         const horaFi = new Date(`1970-01-01T${newAction.hora_fi}:00`);
         if (horaInici >= horaFi) {
@@ -261,7 +272,7 @@ const Horaris = ({ user }) => {
         }
       }
       try {
-        if (newAction.usuari_id === 'tots') {
+        if (newAction.usuari_id === 'tots') { // Crea tasca per a tots els usuaris
           const promises = users.map((u) =>
             api.post(
               '/tasques',
@@ -276,7 +287,7 @@ const Horaris = ({ user }) => {
             )
           );
           await Promise.all(promises);
-        } else {
+        } else { // Crea tasca per a un usuari
           await api.post(
             '/tasques',
             {
@@ -298,6 +309,7 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Actualitza un horari existent
   const handleUpdateHorari = async (e) => {
     e.preventDefault();
     const horaInici = new Date(`1970-01-01T${editHorari.hora_inici}:00`);
@@ -306,7 +318,7 @@ const Horaris = ({ user }) => {
       setError("L'hora d'inici ha de ser anterior a l'hora de fi.");
       return;
     }
-    const overlappingHorari = horaris.find(
+    const overlappingHorari = horaris.find( // Comprova solapaments
       (horari) =>
         horari.id !== editHorari.id &&
         horari.extendedProps.data === editHorari.data &&
@@ -339,6 +351,7 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Elimina un horari
   const handleDeleteHorari = async () => {
     if (window.confirm('Estàs segur que vols eliminar aquest horari?')) {
       try {
@@ -353,13 +366,14 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Actualitza una tasca existent
   const handleUpdateTasca = async (e) => {
     e.preventDefault();
     if (!editTasca.descripcio.trim()) {
       setError('La descripció de la tasca no pot estar buida.');
       return;
     }
-    if (editTasca.hora_inici && editTasca.hora_fi) {
+    if (editTasca.hora_inici && editTasca.hora_fi) { // Valida hores dins horari per defecte
       const horaInici = new Date(`1970-01-01T${editTasca.hora_inici}:00`);
       const horaFi = new Date(`1970-01-01T${editTasca.hora_fi}:00`);
       if (horaInici >= horaFi) {
@@ -392,6 +406,7 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Elimina una tasca
   const handleDeleteTasca = async () => {
     if (window.confirm('Estàs segur que vols eliminar aquesta tasca?')) {
       try {
@@ -405,14 +420,17 @@ const Horaris = ({ user }) => {
     }
   };
 
+  // Aplica els filtres i recarrega dades
   const handleFilterSubmit = (e) => {
     e.preventDefault();
     fetchHoraris();
     fetchTasques();
   };
 
+  // Interfície d'usuari
   return (
     <div className="space-y-10">
+      {/* Capçalera amb títol i comptador d'esdeveniments */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 rounded-3xl shadow-xl animate-fade-in">
         <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight flex items-center">
           <FaCalendarAlt className="mr-3 text-3xl" /> Horaris
@@ -422,6 +440,7 @@ const Horaris = ({ user }) => {
         </div>
       </div>
 
+      {/* Missatges d'error */}
       {error && (
         <div className="animate-slide-in flex items-center p-4 rounded-xl bg-red-50 text-red-700 border border-red-200 shadow-md">
           <svg
@@ -441,6 +460,7 @@ const Horaris = ({ user }) => {
           <p>{error}</p>
         </div>
       )}
+      {/* Missatges d'èxit */}
       {success && (
         <div className="animate-slide-in flex items-center p-4 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 shadow-md">
           <svg
@@ -461,6 +481,7 @@ const Horaris = ({ user }) => {
         </div>
       )}
 
+      {/* Estils CSS per personalitzar el calendari i elements */}
       <style>
         {`
           .fc-daygrid-event {
@@ -578,12 +599,13 @@ const Horaris = ({ user }) => {
         `}
       </style>
 
+      {/* Secció de filtres */}
       <div className="bg-white p-8 rounded-2xl shadow-lg border border-blue-100">
         <h3 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
           <FaFilter className="mr-2" /> Gestió de Registres
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {user.rol_id === 1 && (
+          {user.rol_id === 1 && ( // Selector d'usuari (només admins)
             <div>
               <label htmlFor="userSelect" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                 <FaUser className="mr-2 text-blue-600" /> Selecciona un Usuari
@@ -603,6 +625,7 @@ const Horaris = ({ user }) => {
             </div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Filtres per data, estat i cerca */}
             <div>
               <label htmlFor="filterStartDate" className="block text-sm font-medium text-gray-700 mb-2">
                 Data Inici
@@ -664,7 +687,7 @@ const Horaris = ({ user }) => {
           >
             <FaFilter className="mr-2" /> Filtrar
           </button>
-          {user.rol_id === 1 && (
+          {user.rol_id === 1 && ( // Botó per crear nova acció (només admins)
             <button
               onClick={() => {
                 setNewAction({
@@ -685,6 +708,7 @@ const Horaris = ({ user }) => {
         </div>
       </div>
 
+      {/* Mostra horari per defecte d'avui */}
       {defaultHorari && (
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-blue-100">
           <h3 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
@@ -701,42 +725,43 @@ const Horaris = ({ user }) => {
         </div>
       )}
 
+      {/* Calendari amb esdeveniments */}
       <div className="bg-white p-8 rounded-2xl shadow-lg border border-blue-100">
         <h3 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
           <FaCalendarAlt className="mr-2" /> Calendari
         </h3>
         <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          events={allEvents}
-          dateClick={handleDateClick}
-          eventClick={handleEventClick}
-          headerToolbar={{
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]} // Plugins utilitzats
+          initialView="dayGridMonth" // Vista inicial: mes
+          events={allEvents} // Esdeveniments a mostrar
+          dateClick={handleDateClick} // Clic en una data
+          eventClick={handleEventClick} // Clic en un esdeveniment
+          headerToolbar={{ // Configuració de la barra d'eines
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
           }}
-          buttonText={{
+          buttonText={{ // Textos dels botons
             today: 'Avui',
             month: 'Mes',
             week: 'Setmana',
             day: 'Dia',
             list: 'Llista',
           }}
-          locale="ca"
-          firstDay={1}
-          eventTimeFormat={{
+          locale="ca" // Idioma català
+          firstDay={1} // Primer dia: dilluns
+          eventTimeFormat={{ // Format de l'hora
             hour: '2-digit',
             minute: '2-digit',
             hour12: false,
           }}
-          slotLabelFormat={{
+          slotLabelFormat={{ // Format de les hores al calendari
             hour: '2-digit',
             minute: '2-digit',
             hour12: false,
           }}
-          height="auto"
-          dayCellClassNames={(arg) => {
+          height="auto" // Alçada automàtica
+          dayCellClassNames={(arg) => { // Ressalta el dia actual
             const today = new Date();
             if (
               arg.date.getDate() === today.getDate() &&
@@ -747,7 +772,7 @@ const Horaris = ({ user }) => {
             }
             return '';
           }}
-          eventContent={(arg) => (
+          eventContent={(arg) => ( // Contingut dels esdeveniments
             <div className="flex items-center p-1">
               {arg.event.extendedProps.type === 'tasca' && (
                 <>
@@ -771,10 +796,11 @@ const Horaris = ({ user }) => {
               )}
             </div>
           )}
-          eventClassNames="rounded-lg shadow-sm"
+          eventClassNames="rounded-lg shadow-sm" // Estils dels esdeveniments
         />
       </div>
 
+      {/* Modal per crear nova acció (només admins) */}
       {showActionModal && user.rol_id === 1 && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
@@ -806,7 +832,7 @@ const Horaris = ({ user }) => {
                   </select>
                 </div>
               )}
-              {user.rol_id === 1 && (
+              {user.rol_id === 1 && ( // Selector d'usuari
                 <div className="mb-5">
                   <label htmlFor="usuari_id" className="block text-sm font-medium text-gray-700 mb-1">
                     Assignar a l'Usuari
@@ -901,6 +927,7 @@ const Horaris = ({ user }) => {
         </div>
       )}
 
+      {/* Modal per editar horari (només admins) */}
       {showEditModal && user.rol_id === 1 && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
@@ -974,6 +1001,7 @@ const Horaris = ({ user }) => {
         </div>
       )}
 
+      {/* Modal per editar tasca */}
       {showEditTascaModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">

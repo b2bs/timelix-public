@@ -3,6 +3,7 @@ import api from '../services/api';
 import { FaUser, FaEdit } from 'react-icons/fa';
 
 const ProfileForm = ({ user, setUser }) => {
+  // Estat per als camps del formulari inicialitzat amb les dades de l'usuari
   const [formData, setFormData] = useState({
     nom: user.nom,
     cognom: user.cognom || '', // Nou camp per cognom, amb valor per defecte buit si no existeix
@@ -11,8 +12,11 @@ const ProfileForm = ({ user, setUser }) => {
     novaContrasenya: '',
     confirmarNovaContrasenya: '',
   });
+  // Estat per a missatges d'error general
   const [error, setError] = useState('');
+  // Estat per a missatges d'èxit general
   const [success, setSuccess] = useState('');
+  // Estat per a errors específics de cada camp del formulari
   const [errors, setErrors] = useState({
     nom: '',
     cognom: '', // Nou camp per errors de cognom
@@ -22,6 +26,7 @@ const ProfileForm = ({ user, setUser }) => {
     confirmarNovaContrasenya: '',
   });
 
+  // Funció que valida el formulari abans d'enviar
   const validateForm = () => {
     let isValid = true;
     const newErrors = {
@@ -33,26 +38,26 @@ const ProfileForm = ({ user, setUser }) => {
       confirmarNovaContrasenya: '',
     };
 
-    // Validació del nom
+    // Validació del nom: mínim 2 caràcters
     if (formData.nom.length < 2) {
       newErrors.nom = 'El nom ha de tenir almenys 2 caràcters.';
       isValid = false;
     }
 
-    // Validació del cognom (opcional però amb mínim de 2 caràcters si s'omple)
+    // Validació del cognom (opcional però si està present mínim 2 caràcters)
     if (formData.cognom && formData.cognom.length < 2) {
       newErrors.cognom = 'El cognom ha de tenir almenys 2 caràcters si el completes.';
       isValid = false;
     }
 
-    // Validació del correu
+    // Validació del correu amb regex bàsica
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.correu)) {
       newErrors.correu = 'Introdueix un correu electrònic vàlid.';
       isValid = false;
     }
 
-    // Validació de la contrasenya (sempre requerida per verificar l'usuari)
+    // Validació de la contrasenya actual (requerida)
     if (!formData.contrasenya) {
       newErrors.contrasenya = 'Has d’introduir la contrasenya actual per verificar la teva identitat.';
       isValid = false;
@@ -61,7 +66,7 @@ const ProfileForm = ({ user, setUser }) => {
       isValid = false;
     }
 
-    // Validació de la nova contrasenya (només si s'ha omplert algun dels camps de nova contrasenya)
+    // Validació de la nova contrasenya (si s'intenta canviar)
     if (formData.novaContrasenya || formData.confirmarNovaContrasenya) {
       if (!formData.novaContrasenya) {
         newErrors.novaContrasenya = 'Has d’introduir una nova contrasenya.';
@@ -80,26 +85,30 @@ const ProfileForm = ({ user, setUser }) => {
       }
     }
 
+    // Actualitza els errors d'estat per mostrar-los
     setErrors(newErrors);
     return isValid;
   };
 
+  // Funció per gestionar el canvi en qualsevol camp del formulari
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: '' });
+    setErrors({ ...errors, [e.target.name]: '' }); // Neteja l'error del camp canviat
   };
 
+  // Funció per gestionar l'enviament del formulari
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
+    // Valida el formulari abans d'enviar
     if (!validateForm()) {
       return;
     }
 
     try {
-      // Actualitzem les dades personals (nom, cognom i correu)
+      // Actualitza les dades personals enviant-les a l'API
       const profileResponse = await api.put(
         '/usuaris/profile',
         {
@@ -111,7 +120,7 @@ const ProfileForm = ({ user, setUser }) => {
         { withCredentials: true }
       );
 
-      // Si s'ha proporcionat una nova contrasenya, la canviem
+      // Si s'ha proporcionat nova contrasenya, canvia-la també a l'API
       let passwordChanged = false;
       if (formData.novaContrasenya && formData.confirmarNovaContrasenya) {
         await api.put(
@@ -125,13 +134,15 @@ const ProfileForm = ({ user, setUser }) => {
         passwordChanged = true;
       }
 
-      // Actualitzem l'estat de l'usuari
+      // Actualitza l'estat global de l'usuari amb les noves dades
       setUser({ ...user, nom: formData.nom, cognom: formData.cognom, correu: formData.correu });
+      // Mostra missatge d'èxit segons s'hagi canviat la contrasenya o no
       setSuccess(
         passwordChanged
           ? 'Dades i contrasenya actualitzades amb èxit!'
           : 'Dades actualitzades amb èxit!'
       );
+      // Reseteja els camps de contrasenya del formulari
       setFormData({
         ...formData,
         contrasenya: '',
@@ -139,6 +150,7 @@ const ProfileForm = ({ user, setUser }) => {
         confirmarNovaContrasenya: '',
       });
     } catch (err) {
+      // Gestiona els errors de l'API i mostra missatge corresponent
       const errorMessage = err.response?.data?.message || 'Error al actualitzar les dades';
       const errorDetails = err.response?.data?.error || '';
       const sqlError = err.response?.data?.sqlError || '';
@@ -154,14 +166,14 @@ const ProfileForm = ({ user, setUser }) => {
 
   return (
     <div className="space-y-10">
-      {/* Títol Principal */}
+      {/* Títol principal amb icona */}
       <div className="flex items-center justify-between">
         <h2 className="text-4xl font-extrabold text-blue-700 tracking-tight flex items-center">
           <FaUser className="mr-2" /> Edita el teu Perfil
         </h2>
       </div>
 
-      {/* Missatges d'Error i Èxit */}
+      {/* Missatges d'error i èxit */}
       {error && (
         <div className="animate-slide-in flex items-center p-4 rounded-xl bg-red-50 text-red-700 border border-red-200 shadow-md">
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,13 +191,13 @@ const ProfileForm = ({ user, setUser }) => {
         </div>
       )}
 
-      {/* Formulari dins d'una targeta */}
+      {/* Formulari amb estil */}
       <div className="bg-white p-8 rounded-2xl shadow-lg border border-blue-100">
         <h3 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
           <FaEdit className="mr-2" /> Dades Personals
         </h3>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Nom */}
+          {/* Camp Nom */}
           <div>
             <label htmlFor="nom" className="block text-sm font-medium text-gray-700 mb-2">
               Nom
@@ -201,10 +213,11 @@ const ProfileForm = ({ user, setUser }) => {
               }`}
               required
             />
+            {/* Missatge d'error específic per nom */}
             {errors.nom && <p className="text-red-500 text-sm mt-1">{errors.nom}</p>}
           </div>
 
-          {/* Cognom */}
+          {/* Camp Cognom */}
           <div>
             <label htmlFor="cognom" className="block text-sm font-medium text-gray-700 mb-2">
               Cognom
@@ -219,89 +232,98 @@ const ProfileForm = ({ user, setUser }) => {
                 errors.cognom ? 'border-red-500' : ''
               }`}
             />
+            {/* Missatge d'error específic per cognom */}
             {errors.cognom && <p className="text-red-500 text-sm mt-1">{errors.cognom}</p>}
           </div>
 
-          {/* Correu */}
+          {/* Camp Correu */}
           <div>
             <label htmlFor="correu" className="block text-sm font-medium text-gray-700 mb-2">
-              Correu Electrònic
+              Correu electrònic
             </label>
             <input
               type="email"
               name="correu"
               value={formData.correu}
               onChange={handleChange}
-              placeholder="El teu correu electrònic"
+              placeholder="exemple@domini.com"
               className={`w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 text-gray-800 placeholder-gray-400 shadow-sm ${
                 errors.correu ? 'border-red-500' : ''
               }`}
               required
             />
+            {/* Missatge d'error específic per correu */}
             {errors.correu && <p className="text-red-500 text-sm mt-1">{errors.correu}</p>}
           </div>
 
-          {/* Contrasenya Actual */}
+          {/* Camp Contrasenya Actual */}
           <div>
             <label htmlFor="contrasenya" className="block text-sm font-medium text-gray-700 mb-2">
-              Contrasenya Actual (requerida per verificar)
+              Contrasenya actual
             </label>
             <input
               type="password"
               name="contrasenya"
               value={formData.contrasenya}
               onChange={handleChange}
-              placeholder="Contrasenya actual"
+              placeholder="Introdueix la teva contrasenya actual"
               className={`w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 text-gray-800 placeholder-gray-400 shadow-sm ${
                 errors.contrasenya ? 'border-red-500' : ''
               }`}
               required
             />
+            {/* Missatge d'error específic per contrasenya */}
             {errors.contrasenya && <p className="text-red-500 text-sm mt-1">{errors.contrasenya}</p>}
           </div>
 
-          {/* Nova Contrasenya */}
+          {/* Camp Nova Contrasenya */}
           <div>
             <label htmlFor="novaContrasenya" className="block text-sm font-medium text-gray-700 mb-2">
-              Nova Contrasenya (opcional)
+              Nova contrasenya (opcional)
             </label>
             <input
               type="password"
               name="novaContrasenya"
               value={formData.novaContrasenya}
               onChange={handleChange}
-              placeholder="Nova contrasenya"
+              placeholder="Introdueix una nova contrasenya"
               className={`w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 text-gray-800 placeholder-gray-400 shadow-sm ${
                 errors.novaContrasenya ? 'border-red-500' : ''
               }`}
             />
-            {errors.novaContrasenya && <p className="text-red-500 text-sm mt-1">{errors.novaContrasenya}</p>}
+            {/* Missatge d'error específic per nova contrasenya */}
+            {errors.novaContrasenya && (
+              <p className="text-red-500 text-sm mt-1">{errors.novaContrasenya}</p>
+            )}
           </div>
 
-          {/* Confirmar Nova Contrasenya */}
+          {/* Camp Confirmar Nova Contrasenya */}
           <div>
             <label htmlFor="confirmarNovaContrasenya" className="block text-sm font-medium text-gray-700 mb-2">
-              Confirmar Nova Contrasenya (opcional)
+              Confirma la nova contrasenya
             </label>
             <input
               type="password"
               name="confirmarNovaContrasenya"
               value={formData.confirmarNovaContrasenya}
               onChange={handleChange}
-              placeholder="Confirmar nova contrasenya"
+              placeholder="Re-introdueix la nova contrasenya"
               className={`w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 text-gray-800 placeholder-gray-400 shadow-sm ${
                 errors.confirmarNovaContrasenya ? 'border-red-500' : ''
               }`}
             />
-            {errors.confirmarNovaContrasenya && <p className="text-red-500 text-sm mt-1">{errors.confirmarNovaContrasenya}</p>}
+            {/* Missatge d'error específic per confirmar nova contrasenya */}
+            {errors.confirmarNovaContrasenya && (
+              <p className="text-red-500 text-sm mt-1">{errors.confirmarNovaContrasenya}</p>
+            )}
           </div>
 
-          {/* Botó de Submit */}
+          {/* Botó d'enviament */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 flex items-center justify-center"
+            className="w-full flex justify-center items-center gap-2 px-6 py-3 font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg"
           >
-            <FaEdit className="mr-2" /> Actualitzar Perfil
+            Actualitzar perfil
           </button>
         </form>
       </div>

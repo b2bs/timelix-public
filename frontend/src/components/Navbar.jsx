@@ -5,6 +5,7 @@ const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Funció per tancar sessió: elimina la cookie del token, crida el callback d'onLogout, redirigeix a login i tanca el menú
   const handleLogout = () => {
     document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     onLogout();
@@ -12,6 +13,7 @@ const Navbar = ({ user, onLogout }) => {
     setIsOpen(false);
   };
 
+  // Funció per alternar l'estat obert/tancat del menú per a pantalles petites
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
@@ -20,7 +22,7 @@ const Navbar = ({ user, onLogout }) => {
     <nav className="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          {/* Logo and Text */}
+          {/* Logo i text de la marca */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <img src="/timelix.png" alt="Timelix Logo" className="h-10 w-auto" />
@@ -28,9 +30,9 @@ const Navbar = ({ user, onLogout }) => {
             </Link>
           </div>
 
-          {/* Menú per a pantalles grans */}
+          {/* Menú visible només en pantalles grans (md cap amunt) */}
           <div className="hidden md:flex md:items-center md:space-x-6">
-            {/* Enllaços generals */}
+            {/* Enllaços comuns a tots els usuaris */}
             <Link to="/" className="text-white hover:text-blue-200 transition duration-300">
               Inici
             </Link>
@@ -41,7 +43,7 @@ const Navbar = ({ user, onLogout }) => {
               Contacte
             </Link>
 
-            {/* Enllaços per a usuaris autenticats */}
+            {/* Enllaços només per a usuaris autenticats */}
             {user && (
               <>
                 <Link to="/entrades-sortides" className="text-white hover:text-blue-200 transition duration-300">
@@ -53,14 +55,14 @@ const Navbar = ({ user, onLogout }) => {
               </>
             )}
 
-            {/* Enllaços només per a administradors */}
+            {/* Enllaços només per a administradors (rol_id === 1) */}
             {user && user.rol_id === 1 && (
               <Link to="/usuaris" className="text-white hover:text-blue-200 transition duration-300">
                 Gestió d'Usuaris
               </Link>
             )}
 
-            {/* Enllaços d'autenticació */}
+            {/* Enllaços d'autenticació depenent de si l'usuari està autenticat */}
             {user ? (
               <>
                 <Link to="/profile" className="text-white hover:text-blue-200 transition duration-300">
@@ -85,13 +87,14 @@ const Navbar = ({ user, onLogout }) => {
             )}
           </div>
 
-          {/* Botó del menú per a pantalles petites */}
+          {/* Botó per obrir/tancar el menú en pantalles petites */}
           <div className="md:hidden flex items-center">
             <button
               onClick={toggleMenu}
               className="text-white focus:outline-none"
               aria-label="Toggle menu"
             >
+              {/* Icona canviant segons l'estat del menú (hamburguesa o creu) */}
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -120,10 +123,11 @@ const Navbar = ({ user, onLogout }) => {
         </div>
       </div>
 
-      {/* Menú desplegable per a pantalles petites */}
+      {/* Menú desplegable per a pantalles petites quan isOpen és true */}
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {/* Enllaços comuns */}
             <Link
               to="/"
               onClick={toggleMenu}
@@ -146,6 +150,7 @@ const Navbar = ({ user, onLogout }) => {
               Contacte
             </Link>
 
+            {/* Enllaços només per a usuaris autenticats */}
             {user && (
               <>
                 <Link
@@ -165,6 +170,7 @@ const Navbar = ({ user, onLogout }) => {
               </>
             )}
 
+            {/* Enllaços només per a administradors */}
             {user && user.rol_id === 1 && (
               <Link
                 to="/usuaris"
@@ -175,6 +181,7 @@ const Navbar = ({ user, onLogout }) => {
               </Link>
             )}
 
+            {/* Enllaços d'autenticació en menú mòbil */}
             {user ? (
               <>
                 <Link

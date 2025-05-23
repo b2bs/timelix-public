@@ -1,16 +1,18 @@
 // models/usuari.js
 const db = require('../config/db');
 
+// Obtenim tots els usuaris amb els camps específics
 const getAllUsers = (callback) => {
     db.query('SELECT id, nom, cognoms, correu, rol_id FROM usuaris', callback);
 };
 
+// Creem un nou usuari a la base de dades
 const createUser = (nom, cognoms, correu, contrasenya, rol_id, callback) => {
     const query = 'INSERT INTO usuaris (nom, cognoms, correu, contrasenya, rol_id) VALUES (?, ?, ?, ?, ?)';
     db.query(query, [nom, cognoms, correu, contrasenya, rol_id], callback);
 };
 
-// Nova funció per actualitzar només nom, cognoms i correu (per a updateProfile)
+// Actualitzem només el nom, cognoms i correu d'un usuari (perfil)
 const updateUserProfile = (id, nom, cognoms, correu, callback) => {
     const query = 'UPDATE usuaris SET nom = ?, cognoms = ?, correu = ? WHERE id = ?';
     db.query(query, [nom, cognoms, correu, id], (err, result) => {
@@ -27,6 +29,7 @@ const updateUserProfile = (id, nom, cognoms, correu, callback) => {
     });
 };
 
+// Actualitzem un usuari amb rol inclòs
 const updateUser = (id, nom, cognoms, correu, rol_id, callback) => {
     const query = 'UPDATE usuaris SET nom = ?, cognoms = ?, correu = ?, rol_id = ? WHERE id = ?';
     db.query(query, [nom, cognoms, correu, rol_id, id], (err, result) => {
@@ -38,11 +41,13 @@ const updateUser = (id, nom, cognoms, correu, rol_id, callback) => {
     });
 };
 
+// Eliminem un usuari per id
 const deleteUser = (id, callback) => {
     const query = 'DELETE FROM usuaris WHERE id = ?';
     db.query(query, [id], callback);
 };
 
+// Obtenim un usuari per id amb tots els camps importants
 const getUserById = (id, callback) => {
     db.query('SELECT id, nom, cognoms, correu, contrasenya, rol_id FROM usuaris WHERE id = ?', [id], (err, results) => {
         if (err) {
@@ -53,6 +58,7 @@ const getUserById = (id, callback) => {
     });
 };
 
+// Comprovem si un correu ja existeix en la base de dades, excloent un usuari concret (per a actualitzacions)
 const checkEmailExists = (correu, excludeUserId, callback) => {
     db.query('SELECT id FROM usuaris WHERE correu = ? AND id != ?', [correu, excludeUserId], (err, results) => {
         if (err) {

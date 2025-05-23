@@ -1,45 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-proxy-deployment
-  namespace: grup13
+  name: nginx-proxy-deployment  # Nom del deployment per l'instància del proxy nginx
+  namespace: grup13  # Namespace on es desplega aquest recurs
 spec:
-  replicas: 1
+  replicas: 1  # Nombre de rèpliques (pods) del deployment
   selector:
     matchLabels:
-      app: nginx-proxy
+      app: nginx-proxy  # Selector per relacionar el deployment amb els pods que gestiona
   template:
     metadata:
       labels:
-        app: nginx-proxy
+        app: nginx-proxy  # Etiqueta assignada als pods creats per aquest deployment
     spec:
       containers:
-      - name: nginx-proxy
-        image: kube0.lacetania.cat/grup13/nginx-proxy:latest
+      - name: nginx-proxy  # Nom del container dins del pod
+        image: kube0.lacetania.cat/grup13/nginx-proxy:latest  # Imatge del container del proxy nginx
         ports:
-        - containerPort: 80  # Només port 80 per HTTP
+        - containerPort: 80  # Exposa el port 80 per servir tràfic HTTP
         resources:
           requests:
-            cpu: "100m"
-            memory: "128Mi"
+            cpu: "100m"  # Recursos mínims garantits (CPU)
+            memory: "128Mi"  # Memòria mínima garantida
           limits:
-            cpu: "200m"
-            memory: "256Mi"
+            cpu: "200m"  # Màxim CPU assignat
+            memory: "256Mi"  # Màxima memòria assignada
       imagePullSecrets:
-      - name: harbor-credentials
+      - name: harbor-credentials  # Secret per autenticar amb el registre d'imatges privat
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-proxy-service
-  namespace: grup13
+  name: nginx-proxy-service  # Nom del servei per exposar el deployment
+  namespace: grup13  # Namespace del servei
 spec:
   selector:
-    app: nginx-proxy
+    app: nginx-proxy  # Selector per vincular el servei amb el pod nginx-proxy
   ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 80
-    nodePort: 32013  # Port assignat per al teu grup
-  type: NodePort
+  - name: http  # Nom del port exposat pel servei
+    protocol: TCP  # Protocol utilitzat
+    port: 80  # Port del servei dins del cluster
+    targetPort: 80  # Port al container on es redirigeix el tràfic
+    nodePort: 32013  # Port exposat al node per accés extern (NodePort)
+  type: NodePort  # Tipus de servei que exposa un port específic a cada node del cluster

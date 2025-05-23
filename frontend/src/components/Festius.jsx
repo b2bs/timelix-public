@@ -3,16 +3,23 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
 const Festius = ({ user }) => {
+  // Estat per guardar la llista de festius
   const [festius, setFestius] = useState([]);
+  // Estat per a un nou festiu que es vol crear
   const [newFestiu, setNewFestiu] = useState({ data: '', nom: '' });
+  // Estat per a l'edició d'un festiu existent
   const [editFestiu, setEditFestiu] = useState(null);
+  // Estat per mostrar errors a l'usuari
   const [error, setError] = useState('');
+  // Estat per mostrar missatges d'èxit a l'usuari
   const [success, setSuccess] = useState('');
 
+  // Al muntar el component, carregar la llista de festius
   useEffect(() => {
     fetchFestius();
   }, []);
 
+  // Funció per obtenir la llista de festius des del backend
   const fetchFestius = async () => {
     try {
       const response = await api.get('/festius', { withCredentials: true });
@@ -22,6 +29,7 @@ const Festius = ({ user }) => {
     }
   };
 
+  // Manejador per crear un nou festiu enviant dades al backend
   const handleCreateFestiu = async (e) => {
     e.preventDefault();
     try {
@@ -34,6 +42,7 @@ const Festius = ({ user }) => {
     }
   };
 
+  // Manejador per actualitzar un festiu existent enviant dades al backend
   const handleUpdateFestiu = async (e) => {
     e.preventDefault();
     try {
@@ -46,6 +55,7 @@ const Festius = ({ user }) => {
     }
   };
 
+  // Manejador per eliminar un festiu després de confirmació de l'usuari
   const handleDeleteFestiu = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquest festiu?')) {
       try {
@@ -63,6 +73,7 @@ const Festius = ({ user }) => {
       {/* Missatges d'èxit o error */}
       {error && (
         <div className="flex items-center bg-red-50 text-red-700 p-4 rounded-lg animate-fade-in">
+          {/* Icona per errors */}
           <svg
             className="w-5 h-5 mr-2"
             fill="none"
@@ -82,6 +93,7 @@ const Festius = ({ user }) => {
       )}
       {success && (
         <div className="flex items-center bg-green-50 text-green-700 p-4 rounded-lg animate-fade-in">
+          {/* Icona per èxit */}
           <svg
             className="w-5 h-5 mr-2"
             fill="none"
@@ -149,12 +161,14 @@ const Festius = ({ user }) => {
                   {festiu.data} - {festiu.nom}
                 </span>
                 <div className="space-x-2">
+                  {/* Botó per iniciar l'edició d'un festiu */}
                   <button
                     onClick={() => setEditFestiu(festiu)}
                     className="text-blue-600 hover:underline"
                   >
                     Editar
                   </button>
+                  {/* Botó per eliminar un festiu */}
                   <button
                     onClick={() => handleDeleteFestiu(festiu.id)}
                     className="text-red-600 hover:underline"
@@ -201,6 +215,7 @@ const Festius = ({ user }) => {
                 />
               </div>
               <div className="flex justify-end space-x-3">
+                {/* Botó per cancel·lar l'edició */}
                 <button
                   type="button"
                   onClick={() => setEditFestiu(null)}
@@ -208,6 +223,7 @@ const Festius = ({ user }) => {
                 >
                   Cancel·lar
                 </button>
+                {/* Botó per actualitzar el festiu */}
                 <button
                   type="submit"
                   className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300"

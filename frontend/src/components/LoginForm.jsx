@@ -4,50 +4,66 @@ import api from '../services/api';
 import { FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
 
 const LoginForm = ({ setUser }) => {
+  // Estat per emmagatzemar les credencials del formulari (correu i contrasenya)
   const [credentials, setCredentials] = useState({ correu: '', contrasenya: '' });
+  // Estat per mostrar errors generals de login
   const [error, setError] = useState('');
+  // Estat per mostrar errors específics per camps del formulari
   const [errors, setErrors] = useState({ correu: '', contrasenya: '' });
 
+  // Funció per validar els camps del formulari abans d'enviar
   const validateForm = () => {
     let isValid = true;
     const newErrors = { correu: '', contrasenya: '' };
 
+    // Expressió regular per validar correu electrònic
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(credentials.correu)) {
       newErrors.correu = 'Introdueix un correu electrònic vàlid.';
       isValid = false;
     }
 
+    // Comprova que la contrasenya tingui almenys 6 caràcters
     if (credentials.contrasenya.length < 6) {
       newErrors.contrasenya = 'La contrasenya ha de tenir almenys 6 caràcters.';
       isValid = false;
     }
 
+    // Actualitza l'estat dels errors amb els nous errors trobats
     setErrors(newErrors);
     return isValid;
   };
 
+  // Funció per actualitzar l'estat de les credencials i netejar errors quan l'usuari escriu
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: '' });
   };
 
+  // Funció que s'executa quan s'envia el formulari
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
+    // Si el formulari no és vàlid, no continua
     if (!validateForm()) {
       return;
     }
 
     try {
+      // Fa la petició de login a l'API
       const response = await api.post('/auth/login', credentials, { withCredentials: true });
       console.log('Resposta del login:', response.data);
+
+      // Si el login és correcte, obté el perfil de l'usuari
       const profileResponse = await api.get('/usuaris/profile', { withCredentials: true });
       console.log('Perfil obtingut:', profileResponse.data);
+
+      // Actualitza l'usuari al component pare
       setUser(profileResponse.data);
       setError('');
     } catch (err) {
+      // En cas d'error, mostra missatge d'error apropiat
       console.error('Error al login:', err.response?.data || err.message);
       setError(err.response?.data?.message || 'Error al iniciar sessió');
     }
@@ -55,7 +71,7 @@ const LoginForm = ({ setUser }) => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative">
-      {/* Decorative background bubbles */}
+      {/* Bombolles decoratives de fons animades */}
       <div className="absolute bottom-0 left-5 w-20 h-20 bg-blue-200 rounded-full opacity-20 animate-riseUp" style={{ animationDelay: '0s' }}></div>
       <div className="absolute bottom-0 right-5 w-24 h-24 bg-blue-300 rounded-full opacity-20 animate-riseUp" style={{ animationDelay: '0.25s' }}></div>
       <div className="absolute bottom-0 left-10 w-22 h-22 bg-blue-600 rounded-full opacity-15 animate-riseUp" style={{ animationDelay: '0.5s' }}></div>
@@ -77,7 +93,7 @@ const LoginForm = ({ setUser }) => {
       <div className="absolute bottom-0 left-50 w-26 h-26 bg-blue-600 rounded-full opacity-15 animate-riseUp" style={{ animationDelay: '4.5s' }}></div>
       <div className="absolute bottom-0 right-50 w-22 h-22 bg-blue-400 rounded-full opacity-15 animate-riseUp" style={{ animationDelay: '4.75s' }}></div>
 
-      {/* Title and Paragraph */}
+      {/* Títol i paràgraf introductori */}
       <div className="text-center">
         <h2 className="mt-0 text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent animate-slide-down transition-all duration-300 mb-4">
           Iniciar Sessió a Timelix
@@ -87,8 +103,9 @@ const LoginForm = ({ setUser }) => {
         </p>
       </div>
 
-      {/* Form container */}
+      {/* Contenidor del formulari */}
       <div className="max-w-md w-full bg-gradient-to-br from-white to-blue-50 shadow-2xl rounded-3xl p-10 border border-blue-100 relative overflow-hidden animate-slide-up">
+        {/* Mostra un error general si existeix */}
         {error && (
           <div className="animate-slide-in flex items-center p-4 rounded-xl bg-red-50 text-red-700 border border-red-200 shadow-md mb-6">
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,6 +116,7 @@ const LoginForm = ({ setUser }) => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Camp correu electrònic */}
           <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up">
             <label htmlFor="correu" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
               <FaEnvelope className="mr-2 text-blue-600 transform hover:scale-110 transition-transform duration-300" /> Correu Electrònic
@@ -112,9 +130,11 @@ const LoginForm = ({ setUser }) => {
               className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 ${errors.correu ? 'border-red-500' : 'border-gray-200'}`}
               required
             />
+            {/* Mostra error específic del correu si existeix */}
             {errors.correu && <p className="text-red-500 text-sm mt-1 animate-fade-in">{errors.correu}</p>}
           </div>
 
+          {/* Camp contrasenya */}
           <div className="bg-blue-50 p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 animate-slide-up delay-200">
             <label htmlFor="contrasenya" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
               <FaLock className="mr-2 text-blue-600 transform hover:scale-110 transition-transform duration-300" /> Contrasenya
@@ -128,9 +148,11 @@ const LoginForm = ({ setUser }) => {
               className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 ${errors.contrasenya ? 'border-red-500' : 'border-gray-200'}`}
               required
             />
+            {/* Mostra error específic de la contrasenya si existeix */}
             {errors.contrasenya && <p className="text-red-500 text-sm mt-1 animate-fade-in">{errors.contrasenya}</p>}
           </div>
 
+          {/* Botó per enviar el formulari */}
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center animate-pulse-slow"
@@ -138,6 +160,7 @@ const LoginForm = ({ setUser }) => {
             <FaSignInAlt className="mr-2" /> Iniciar Sessió
           </button>
 
+          {/* Enllaç per registrar-se */}
           <div className="text-center mt-6 animate-slide-up delay-400">
             <p className="text-gray-600">
               No tens compte?{' '}
@@ -152,7 +175,7 @@ const LoginForm = ({ setUser }) => {
   );
 };
 
-// Animacions CSS personalitzades
+// Animacions CSS personalitzades que s'injecten dinàmicament al document
 const styles = `
   @keyframes fadeIn {
     from { opacity: 0; }
@@ -188,6 +211,7 @@ const styles = `
   .animate-riseUp { animation: riseUp 5s linear infinite; }
 `;
 
+// Afegim les animacions a l'style del document
 const styleSheet = document.createElement('style');
 styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);

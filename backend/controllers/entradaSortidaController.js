@@ -3,6 +3,7 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 
+// Registra l'entrada d'un usuari en la data actual
 const registrarEntrada = (req, res) => {
   const userId = req.user.id;
   const data = new Date().toISOString().split('T')[0];
@@ -12,6 +13,7 @@ const registrarEntrada = (req, res) => {
   });
 };
 
+// Registra la sortida d'un usuari en la data actual
 const registrarSortida = (req, res) => {
   const userId = req.user.id;
   const data = new Date().toISOString().split('T')[0];
@@ -21,10 +23,12 @@ const registrarSortida = (req, res) => {
   });
 };
 
+// Obté les entrades i sortides d'un usuari dins d'un període determinat
 const getEntradesSortides = (req, res) => {
   const { usuari_id } = req.params;
   const { startDate, endDate } = req.query;
 
+  // Comprova permisos: només l'usuari mateix o un administrador pot veure les dades
   if (req.user.rol !== 1 && req.user.id !== parseInt(usuari_id)) {
     return res.status(403).json({ message: 'No tens permís per veure aquestes dades' });
   }
@@ -40,9 +44,11 @@ const getEntradesSortides = (req, res) => {
   );
 };
 
+// Genera un informe PDF amb les entrades i sortides d'un usuari
 const generateEntradesSortidesReport = (req, res) => {
   const { usuari_id, startDate, endDate } = req.body;
 
+  // Comprova permisos abans de generar l'informe
   if (req.user.rol !== 1 && req.user.id !== parseInt(usuari_id)) {
     return res.status(403).json({ message: 'No tens permís per generar aquest informe' });
   }
@@ -57,14 +63,17 @@ const generateEntradesSortidesReport = (req, res) => {
         return res.status(400).json({ message: 'No hi ha registres per generar l\'informe' });
       }
 
+      // Crea el directori de reports si no existeix
       const dir = path.join(__dirname, '..', 'reports');
       if (!fs.existsSync(dir)) fs.mkdirSync(dir);
       const fileName = `entrades_sortides_${usuari_id}_${Date.now()}.pdf`;
       const filePath = path.join(dir, fileName);
 
+      // Inicialitza el document PDF
       const doc = new PDFDocument({ size: 'A4', margin: 50 });
       doc.pipe(fs.createWriteStream(filePath));
 
+      // Funcions per formatar data i hora
       const formatDate = (date) => {
         if (!date) return 'No registrada';
         const d = new Date(date);
@@ -76,15 +85,15 @@ const generateEntradesSortidesReport = (req, res) => {
       const formatTime = (time) => {
         if (!time) return 'No registrada';
         const t = new Date(time);
-        // Ajustar per a la zona horària Europe/Madrid (UTC+2 durant horari d'estiu)
-        const offsetMadrid = 120; // Europe/Madrid té un offset de +2 hores (120 minuts) durant l'horari d'estiu
+        const offsetMadrid = 120;
         const adjustedTime = new Date(t.getTime() + offsetMadrid * 60 * 1000);
         return `${adjustedTime.getHours().toString().padStart(2, '0')}:${adjustedTime.getMinutes().toString().padStart(2, '0')}:${adjustedTime.getSeconds().toString().padStart(2, '0')}`;
       };
 
+      // Afegeix el peu de pàgina
       const addFooter = (pageNumber, totalPages) => {
         const now = new Date();
-        const offsetMadrid = 120; // Ajust per Europe/Madrid
+        const offsetMadrid = 120;
         const adjustedNow = new Date(now.getTime() + offsetMadrid * 60 * 1000);
         doc
           .fillColor('#4B5563')
@@ -104,7 +113,7 @@ const generateEntradesSortidesReport = (req, res) => {
           );
       };
 
-      // Obtenir el nom de l'usuari des de la base de dades o req.user
+      // Afegeix informació inicial de l'informe
       const userName = req.user.nom || 'Admin';
 
       doc
@@ -126,6 +135,7 @@ const generateEntradesSortidesReport = (req, res) => {
         .text(periodeText, 50, 110, { align: 'center' });
       doc.moveDown(2);
 
+      // Coordenades i dimensions per a la taula
       const tableTop = doc.y;
       const col1 = 50;
       const col2 = 200;
@@ -133,6 +143,7 @@ const generateEntradesSortidesReport = (req, res) => {
       const rowHeight = 30;
       const tableWidth = doc.page.width - 100;
 
+      // Capçalera de la taula
       const addTableHeader = (y) => {
         doc
           .fillColor('#FFFFFF')
@@ -154,6 +165,7 @@ const generateEntradesSortidesReport = (req, res) => {
       const rowsPerPage = Math.floor((doc.page.height - 180) / rowHeight);
       const totalPages = Math.ceil(entradesSortides.length / rowsPerPage);
 
+      // Generació de files de la taula
       entradesSortides.forEach((es, index) => {
         if (currentY + rowHeight > doc.page.height - 40) {
           addFooter(pageIndex, totalPages);
@@ -178,6 +190,7 @@ const generateEntradesSortidesReport = (req, res) => {
           .text(formatTime(es.hora_entrada), col2 + 10, currentY + 8)
           .text(formatTime(es.hora_sortida), col3 + 10, currentY + 8);
 
+        // Dibuixa línies de la taula
         doc
           .lineWidth(0.5)
           .moveTo(col1, currentY)
@@ -209,6 +222,7 @@ const generateEntradesSortidesReport = (req, res) => {
   );
 };
 
+// Permet descarregar l'informe PDF des del servidor
 const downloadReport = (req, res) => {
   const fileName = req.params.file;
   const filePath = path.join(__dirname, '..', 'reports', fileName);

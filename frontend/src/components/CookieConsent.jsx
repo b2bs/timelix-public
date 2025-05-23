@@ -2,15 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const CookieConsent = () => {
+  // Estat per controlar si el banner és visible o no
   const [isVisible, setIsVisible] = useState(false);
+  // Estat per mostrar o ocultar la configuració avançada de preferències
   const [showSettings, setShowSettings] = useState(false);
+  // Estat per guardar les preferències de cookies de l'usuari
   const [cookiePreferences, setCookiePreferences] = useState({
-    essential: true,
-    analytics: false,
-    marketing: false,
-    functionality: false,
+    essential: true,      // Cookies essencials sempre activades
+    analytics: false,     // Cookies d'anàlisi desactivades per defecte
+    marketing: false,     // Cookies de màrqueting desactivades per defecte
+    functionality: false, // Cookies de funcionalitat desactivades per defecte
   });
 
+  // Efecte que es dispara un cop el component es munta
+  // Comprova si ja hi ha un consentiment guardat, si no, mostra el banner
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
     if (!consent) {
@@ -18,11 +23,13 @@ const CookieConsent = () => {
     }
   }, []);
 
+  // Funció per guardar les preferències seleccionades a localStorage i ocultar el banner
   const savePreferences = () => {
     localStorage.setItem('cookieConsent', JSON.stringify(cookiePreferences));
     setIsVisible(false);
   };
 
+  // Funció per acceptar totes les cookies i desar-ho
   const acceptAll = () => {
     const allAccepted = {
       essential: true,
@@ -35,6 +42,7 @@ const CookieConsent = () => {
     setIsVisible(false);
   };
 
+  // Funció per rebutjar totes menys les essencials i desar-ho
   const rejectAll = () => {
     const essentialOnly = {
       essential: true,
@@ -47,6 +55,7 @@ const CookieConsent = () => {
     setIsVisible(false);
   };
 
+  // Gestor de canvi de les preferències quan l'usuari marca o desmarca una checkbox
   const handlePreferenceChange = (e) => {
     const { name, checked } = e.target;
     setCookiePreferences((prev) => ({
@@ -55,11 +64,14 @@ const CookieConsent = () => {
     }));
   };
 
+  // Si el banner no ha de ser visible, no renderitzem res
   if (!isVisible) return null;
 
   return (
+    // Contenidor principal fixat a la part inferior de la pantalla
     <div className="fixed bottom-0 left-0 right-0 bg-gray-800 bg-opacity-90 text-white p-4 sm:p-6 z-50 w-full max-h-[80vh] overflow-y-auto">
       {!showSettings ? (
+        // Vista principal amb missatge i botons Acceptar, Rebutjar i Personalitzar
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
           <div className="text-xs sm:text-sm md:text-base text-left w-full">
             <p>
@@ -71,18 +83,21 @@ const CookieConsent = () => {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+            {/* Botó per acceptar totes les cookies */}
             <button
               onClick={acceptAll}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 text-sm sm:text-base w-full sm:w-auto"
             >
               Acceptar
             </button>
+            {/* Botó per rebutjar totes menys les essencials */}
             <button
               onClick={rejectAll}
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-300 text-sm sm:text-base w-full sm:w-auto"
             >
               Rebutjar
             </button>
+            {/* Botó per mostrar la configuració avançada */}
             <button
               onClick={() => setShowSettings(true)}
               className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition duration-300 text-sm sm:text-base w-full sm:w-auto"
@@ -92,9 +107,11 @@ const CookieConsent = () => {
           </div>
         </div>
       ) : (
+        // Vista de configuració de preferències amb checkboxes i botons per desar o tornar enrere
         <div className="space-y-4">
           <h3 className="text-base sm:text-lg font-semibold">Configura les teves preferències de cookies</h3>
           <div className="space-y-3">
+            {/* Checkbox per a cookies essencials, sempre activada i deshabilitada */}
             <div className="flex items-start space-x-3">
               <input
                 type="checkbox"
@@ -110,6 +127,7 @@ const CookieConsent = () => {
                 </p>
               </div>
             </div>
+            {/* Checkbox per a cookies d’anàlisi */}
             <div className="flex items-start space-x-3">
               <input
                 type="checkbox"
@@ -125,6 +143,7 @@ const CookieConsent = () => {
                 </p>
               </div>
             </div>
+            {/* Checkbox per a cookies de màrqueting */}
             <div className="flex items-start space-x-3">
               <input
                 type="checkbox"
@@ -140,6 +159,7 @@ const CookieConsent = () => {
                 </p>
               </div>
             </div>
+            {/* Checkbox per a cookies de funcionalitat */}
             <div className="flex items-start space-x-3">
               <input
                 type="checkbox"
@@ -156,6 +176,7 @@ const CookieConsent = () => {
               </div>
             </div>
           </div>
+          {/* Botons per desar preferències o tornar a la vista principal */}
           <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
             <button
               onClick={savePreferences}

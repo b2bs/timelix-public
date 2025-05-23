@@ -1,65 +1,65 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-deployment
-  namespace: grup13
+  name: backend-deployment  # Nom del deployment Kubernetes per al backend
+  namespace: grup13  # Namespace on s'ubica el deployment
 spec:
-  replicas: 1
+  replicas: 1  # Nombre de rèpliques del backend (una instància)
   selector:
     matchLabels:
-      app: backend
+      app: backend  # Selector d'etiquetes per associar amb el pod
   template:
     metadata:
       labels:
-        app: backend
+        app: backend  # Etiqueta aplicada als pods creats pel deployment
     spec:
       containers:
-      - name: backend
-        image: kube0.lacetania.cat/grup13/backend:latest
+      - name: backend  # Nom del contenidor
+        image: kube0.lacetania.cat/grup13/backend:latest  # Imatge Docker a usar
         ports:
-        - containerPort: 3000
+        - containerPort: 3000  # Port exposat dins del contenidor
         env:
-        # PORT i JWT_SECRET també com a literals
+        # Variables d'entorn literals per configuració
         - name: PORT
-          value: "3000"
+          value: "3000"  # Port on escolta el backend
         - name: JWT_SECRET
-          value: "afbb16d88b8576ee84a0a3a828d28849622ff9aecb2f2ec9d4a12f0086e1621d459b4a83976f2f9909bdf4e12da6cafd7a953a5b826ab3a17c92d45a0c692731"
-        # HOST i USER de la base de dades
+          value: "afbb16d88b8576ee84a0a3a828d28849622ff9aecb2f2ec9d4a12f0086e1621d459b4a83976f2f9909bdf4e12da6cafd7a953a5b826ab3a17c92d45a0c692731"  # Clau secreta per JWT
+        # Configuració de base de dades - host i usuari literals
         - name: MYSQL_HOST
-          value: "mysql-service"
+          value: "mysql-service"  # Nom del servei de MySQL dins Kubernetes
         - name: MYSQL_USER
-          value: "root"
-        # PASSWORD i DATABASE des del Secret
+          value: "root"  # Usuari per la base de dades
+        # Contrasenya i base de dades llegides des d'un Secret per seguretat
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: mysql-credentials
-              key: MYSQL_ROOT_PASSWORD
+              name: mysql-credentials  # Nom del Secret que conté les credencials
+              key: MYSQL_ROOT_PASSWORD  # Clau dins del Secret per la contrasenya
         - name: MYSQL_DATABASE
           valueFrom:
             secretKeyRef:
-              name: mysql-credentials
-              key: MYSQL_DATABASE
+              name: mysql-credentials  # Nom del Secret
+              key: MYSQL_DATABASE  # Clau dins del Secret per el nom de la base de dades
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "512Mi"  # Memòria mínima garantida pel contenidor
+            cpu: "500m"  # CPU mínima garantida (0.5 CPU)
           limits:
-            memory: "1Gi"
-            cpu: "1"
+            memory: "1Gi"  # Memòria màxima permesa
+            cpu: "1"  # CPU màxima permesa (1 CPU)
       imagePullSecrets:
-      - name: harbor-credentials
+      - name: harbor-credentials  # Secret per autenticar-se al registre d'imatges privat
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
-  namespace: grup13
+  name: backend-service  # Nom del servei Kubernetes per exposar el backend
+  namespace: grup13  # Namespace on està el servei
 spec:
   selector:
-    app: backend
+    app: backend  # Selecciona pods amb etiqueta app=backend
   ports:
-  - port: 3000
-    targetPort: 3000
-    protocol: TCP
+  - port: 3000  # Port del servei accessible des de fora
+    targetPort: 3000  # Port dins del pod al qual es fa el forwarding
+    protocol: TCP  # Protocol de transport utilitzat

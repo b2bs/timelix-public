@@ -1,67 +1,67 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql-deployment
-  namespace: grup13
+  name: mysql-deployment  # Nom del deployment per a MySQL
+  namespace: grup13  # Namespace on es desplega MySQL
 spec:
-  replicas: 1
+  replicas: 1  # Nombre de rèpliques (una instància de MySQL)
   selector:
     matchLabels:
-      app: mysql
+      app: mysql  # Selector d'etiquetes per relacionar amb els pods
   template:
     metadata:
       labels:
-        app: mysql
+        app: mysql  # Etiqueta aplicada als pods creats per aquest deployment
     spec:
       containers:
-      - name: mysql
-        image: mysql:8.0
+      - name: mysql  # Nom del contenidor MySQL
+        image: mysql:8.0  # Imatge Docker oficial de MySQL versió 8.0
         ports:
-        - containerPort: 3306
+        - containerPort: 3306  # Port exposat per MySQL dins del contenidor
         env:
-        - name: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_ROOT_PASSWORD  # Variable d'entorn per la contrasenya root
           valueFrom:
             secretKeyRef:
-              name: mysql-credentials
-              key: MYSQL_ROOT_PASSWORD   # 🔁 Corregit aquí
-        - name: MYSQL_DATABASE
+              name: mysql-credentials  # Secret on està guardada la contrasenya
+              key: MYSQL_ROOT_PASSWORD   # Clau dins del secret per la contrasenya (corregit)
+        - name: MYSQL_DATABASE  # Variable d'entorn per la base de dades inicial
           valueFrom:
             secretKeyRef:
-              name: mysql-credentials
+              name: mysql-credentials  # Secret on està guardat el nom base de dades
               key: MYSQL_DATABASE
         resources:
           requests:
-            cpu: "250m"
-            memory: "512Mi"
+            cpu: "250m"  # CPU mínima garantida per MySQL
+            memory: "512Mi"  # Memòria mínima garantida
           limits:
-            cpu: "500m"
-            memory: "1Gi"
+            cpu: "500m"  # CPU màxima permesa
+            memory: "1Gi"  # Memòria màxima permesa
         volumeMounts:
-        - name: mysql-storage
-          mountPath: /var/lib/mysql
-        - name: init-sql
-          mountPath: /docker-entrypoint-initdb.d
+        - name: mysql-storage  # Volum per a dades persistents de MySQL
+          mountPath: /var/lib/mysql  # Ruta dins del contenidor per emmagatzemar dades
+        - name: init-sql  # Volum amb scripts d'inicialització SQL
+          mountPath: /docker-entrypoint-initdb.d  # Ruta on MySQL executa scripts d'entrada
       volumes:
-      - name: mysql-storage
+      - name: mysql-storage  # Definició del volum persistent per dades
         persistentVolumeClaim:
-          claimName: mysql-pvc
-      - name: init-sql
+          claimName: mysql-pvc  # Nom del PVC associat per emmagatzematge persistent
+      - name: init-sql  # Definició del volum de configuració per scripts d'inicialització
         configMap:
-          name: mysql-init
+          name: mysql-init  # ConfigMap que conté scripts SQL d'inicialització
           items:
-          - key: gestor_horaris.sql
-            path: gestor_horaris.sql
+          - key: gestor_horaris.sql  # Clau dins del ConfigMap que conté el script
+            path: gestor_horaris.sql  # Nom del fitxer dins del volum
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql-service
-  namespace: grup13
+  name: mysql-service  # Nom del servei per exposar MySQL dins del cluster
+  namespace: grup13  # Namespace on està el servei
 spec:
   selector:
-    app: mysql
+    app: mysql  # Selecciona pods amb etiqueta app=mysql
   ports:
-  - protocol: TCP
-    port: 3306
-    targetPort: 3306
-
+  - protocol: TCP  # Protocol utilitzat pel servei
+    port: 3306  # Port exposat pel servei
+    targetPort: 3306  # Port dins del pod on escolta MySQL

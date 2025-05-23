@@ -1,45 +1,46 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
-  namespace: grup13
+  name: frontend-deployment  # Nom del deployment per al frontend
+  namespace: grup13  # Namespace on s'ubica el deployment
 spec:
-  replicas: 1
+  replicas: 1  # Nombre de rèpliques del frontend (una instància)
   selector:
     matchLabels:
-      app: frontend
+      app: frontend  # Selector d'etiquetes per associar amb el pod
   template:
     metadata:
       labels:
-        app: frontend
+        app: frontend  # Etiqueta aplicada als pods creats pel deployment
     spec:
       containers:
-      - name: frontend
-        image: kube0.lacetania.cat/grup13/frontend:latest
+      - name: frontend  # Nom del contenidor frontend
+        image: kube0.lacetania.cat/grup13/frontend:latest  # Imatge Docker del frontend
         ports:
-        - containerPort: 80
+        - containerPort: 80  # Port exposat dins del contenidor (port HTTP)
         env:
         - name: VITE_API_URL
-          value: "/api/"  # 🔁 Canviat a ruta relativa
+          value: "/api/"  # Ruta relativa per a les API, adaptada per proxy Nginx
         resources:
           requests:
-            cpu: "100m"
-            memory: "256Mi"
+            cpu: "100m"  # CPU mínima garantida pel contenidor
+            memory: "256Mi"  # Memòria mínima garantida
           limits:
-            cpu: "200m"
-            memory: "512Mi"
+            cpu: "200m"  # CPU màxima permesa
+            memory: "512Mi"  # Memòria màxima permesa
       imagePullSecrets:
-      - name: harbor-credentials
+      - name: harbor-credentials  # Secret per autenticar-se al registre d'imatges privat
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
-  namespace: grup13
+  name: frontend-service  # Nom del servei Kubernetes per exposar el frontend
+  namespace: grup13  # Namespace on està el servei
 spec:
   selector:
-    app: frontend
+    app: frontend  # Selecciona pods amb etiqueta app=frontend
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
+  - protocol: TCP  # Protocol de transport utilitzat
+    port: 80  # Port del servei accessible des de fora (HTTP)
+    targetPort: 80  # Port dins del pod on s'executa el frontend

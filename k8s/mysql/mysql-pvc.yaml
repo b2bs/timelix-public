@@ -1,13 +1,12 @@
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: PersistentVolumeClaim  # Tipus de recurs per reclamar espai d'emmagatzematge persistent
 metadata:
-  name: mysql-pvc
-  namespace: grup13
+  name: mysql-pvc  # Nom del PVC, utilitzat per vincular al volum dins del pod MySQL
+  namespace: grup13  # Namespace on es crea el PVC
 spec:
-  storageClassName: nfs-client
+  storageClassName: nfs-client  # Classe d'emmagatzematge que indica el tipus i la configuració del volum
   accessModes:
-    - ReadWriteMany
+    - ReadWriteMany  # Permet que múltiples nodes llegeixin i escriguin simultàniament
   resources:
     requests:
-      storage: 1Gi
-
+      storage: 1Gi  # Cantitat d'espai d'emmagatzematge sol·licitada per aquest PVC

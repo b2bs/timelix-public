@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { FaInfoCircle, FaLock, FaUserShield, FaEnvelope, FaClock, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 const PrivacyPolicy = () => {
+  // Estat per controlar quines seccions estan obertes o tancades
   const [openSections, setOpenSections] = useState({});
 
+  // Funció per alternar l'estat obert/tancat d'una secció concreta
   const toggleSection = (section) => {
     setOpenSections((prev) => ({
       ...prev,
@@ -11,6 +13,7 @@ const PrivacyPolicy = () => {
     }));
   };
 
+  // Definició de les seccions amb contingut, icones i estil de fons
   const sections = [
     {
       id: 'introduccio',
@@ -184,10 +187,13 @@ const PrivacyPolicy = () => {
   ];
 
   return (
+    // Contenidor principal amb fons i espaiats, amb overflow ocult per evitar scroll inesperat durant animacions
     <div className="min-h-screen bg-blue-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Fons decoratiu amb animació de rotació lenta */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 200\'%3E%3Ccircle cx=\'100\' cy=\'100\' r=\'80\' fill=\'none\' stroke=\'%23003d66\' stroke-width=\'2\' opacity=\'0.1\'/%3E%3C/svg%3E')] opacity-20 animate-spin-slow"></div>
+      {/* Contingut central amb amplada màxima i espai entre seccions */}
       <div className="max-w-4xl mx-auto space-y-12 relative z-10">
-        {/* Hero Section */}
+        {/* Secció principal amb títol i subtítol */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 rounded-3xl shadow-xl animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight flex items-center mb-4">
             <FaInfoCircle className="mr-3 text-3xl" /> Política de Privacitat de Timelix
@@ -197,12 +203,13 @@ const PrivacyPolicy = () => {
           </p>
         </div>
 
-        {/* Seccions Desplegables */}
+        {/* Llista de seccions desplegables */}
         {sections.map((section) => (
           <div
             key={section.id}
             className={`p-4 sm:p-6 rounded-2xl shadow-md ${section.bgClass} animate-slide-up`}
           >
+            {/* Botó per obrir/tancar la secció, accessible amb teclat */}
             <button
               onClick={() => toggleSection(section.id)}
               onKeyDown={(e) => ['Enter', ' '].includes(e.key) && toggleSection(section.id)}
@@ -210,16 +217,19 @@ const PrivacyPolicy = () => {
               aria-expanded={!!openSections[section.id]}
               aria-controls={`section-${section.id}`}
             >
+              {/* Icona i títol de la secció */}
               <span className="flex items-center">
                 {section.icon}
                 {section.title}
               </span>
+              {/* Icona que indica l'estat de la secció (oberta o tancada) */}
               {openSections[section.id] ? (
                 <FaChevronUp className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
               ) : (
                 <FaChevronDown className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
               )}
             </button>
+            {/* Contingut visible només si la secció està oberta */}
             {openSections[section.id] && (
               <div
                 id={`section-${section.id}`}
@@ -235,7 +245,7 @@ const PrivacyPolicy = () => {
   );
 };
 
-// Animacions CSS personalitzades
+// Animacions CSS definides com a text i injectades al document
 const styles = `
   @keyframes fadeIn {
     from { opacity: 0; }
@@ -264,6 +274,7 @@ const styles = `
   .animate-spin-slow { animation: spinSlow 20s linear infinite; }
 `;
 
+// Creació i inserció de l'estil en el capçalera del document per a les animacions
 const styleSheet = document.createElement('style');
 styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);

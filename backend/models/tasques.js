@@ -2,6 +2,7 @@ const db = require('../config/db');
 
 const Tasques = {};
 
+// Inserim una nova tasca a la base de dades
 Tasques.createTasca = (usuari_id, data, descripcio, hora_inici, hora_fi, callback) => {
   const query = 'INSERT INTO tasques (usuari_id, data, descripcio, hora_inici, hora_fi) VALUES (?, ?, ?, ?, ?)';
   db.query(query, [usuari_id, data, descripcio, hora_inici, hora_fi], (err, result) => {
@@ -10,6 +11,7 @@ Tasques.createTasca = (usuari_id, data, descripcio, hora_inici, hora_fi, callbac
   });
 };
 
+// Obtenim totes les tasques d'un usuari entre dues dates
 Tasques.getTasquesByUser = (usuari_id, startDate, endDate, callback) => {
   const query = 'SELECT * FROM tasques WHERE usuari_id = ? AND data BETWEEN ? AND ?';
   db.query(query, [usuari_id, startDate, endDate], (err, rows) => {
@@ -18,6 +20,7 @@ Tasques.getTasquesByUser = (usuari_id, startDate, endDate, callback) => {
   });
 };
 
+// Obtenim una tasca específica per id
 Tasques.getTascaById = (id, callback) => {
   const query = 'SELECT * FROM tasques WHERE id = ?';
   db.query(query, [id], (err, rows) => {
@@ -26,6 +29,7 @@ Tasques.getTascaById = (id, callback) => {
   });
 };
 
+// Obtenim l'horari d'un usuari per una data concreta, o retornem horari per defecte si no existeix
 Tasques.getHorariByUserAndDate = (usuari_id, data, callback) => {
   const query = `
     SELECT hd.hora_inici, hd.hora_fi
@@ -46,6 +50,7 @@ Tasques.getHorariByUserAndDate = (usuari_id, data, callback) => {
   });
 };
 
+// Obtenim tasques completes (amb hores d'inici i fi) d'un usuari per una data concreta
 Tasques.getTasquesByUserAndDate = (usuari_id, data, callback) => {
   const query = 'SELECT * FROM tasques WHERE usuari_id = ? AND data = ? AND hora_inici IS NOT NULL AND hora_fi IS NOT NULL';
   db.query(query, [usuari_id, data], (err, rows) => {
@@ -54,6 +59,7 @@ Tasques.getTasquesByUserAndDate = (usuari_id, data, callback) => {
   });
 };
 
+// Actualitzem una tasca per id
 Tasques.updateTasca = (id, data, descripcio, hora_inici, hora_fi, callback) => {
   const query = 'UPDATE tasques SET data = ?, descripcio = ?, hora_inici = ?, hora_fi = ? WHERE id = ?';
   db.query(query, [data, descripcio, hora_inici, hora_fi, id], (err, result) => {
@@ -62,6 +68,7 @@ Tasques.updateTasca = (id, data, descripcio, hora_inici, hora_fi, callback) => {
   });
 };
 
+// Eliminem una tasca per id
 Tasques.deleteTasca = (id, callback) => {
   const query = 'DELETE FROM tasques WHERE id = ?';
   db.query(query, [id], (err, result) => {
@@ -70,6 +77,7 @@ Tasques.deleteTasca = (id, callback) => {
   });
 };
 
+// Marquem una tasca com a completada o no completada
 Tasques.completarTasca = (id, completada, callback) => {
   const query = 'UPDATE tasques SET completada = ? WHERE id = ?';
   db.query(query, [completada, id], (err, result) => {
