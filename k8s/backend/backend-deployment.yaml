@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: grup13
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: kube0.lacetania.cat/grup13/backend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        # PORT i JWT_SECRET també com a literals
+        - name: PORT
+          value: "3000"
+        - name: JWT_SECRET
+          value: "afbb16d88b8576ee84a0a3a828d28849622ff9aecb2f2ec9d4a12f0086e1621d459b4a83976f2f9909bdf4e12da6cafd7a953a5b826ab3a17c92d45a0c692731"
+        # HOST i USER de la base de dades
+        - name: MYSQL_HOST
+          value: "mysql-service"
+        - name: MYSQL_USER
+          value: "root"
+        # PASSWORD i DATABASE des del Secret
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: MYSQL_DATABASE
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+      imagePullSecrets:
+      - name: harbor-credentials
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: grup13
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP

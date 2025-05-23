@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-proxy-deployment
+  namespace: grup13
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-proxy
+  template:
+    metadata:
+      labels:
+        app: nginx-proxy
+    spec:
+      containers:
+      - name: nginx-proxy
+        image: kube0.lacetania.cat/grup13/nginx-proxy:latest
+        ports:
+        - containerPort: 80  # Només port 80 per HTTP
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+      imagePullSecrets:
+      - name: harbor-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-proxy-service
+  namespace: grup13
+spec:
+  selector:
+    app: nginx-proxy
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 32013  # Port assignat per al teu grup
+  type: NodePort

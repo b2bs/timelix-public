@@ -16,7 +16,9 @@ frontend/dist/
 # Compilació (backend)
 backend/dist/
 
-# Sensibles
+# Sensibles (afegim fitxers específics de secrets)
+k8s/mysql/mysql-secret.yaml
+k8s/mysql/jwt-secret.yaml
 *.key
 *.pem
 backend/config/
